@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   FiArrowUpRight,
@@ -5,35 +6,43 @@ import {
   FiActivity,
   FiBarChart2,
 } from "react-icons/fi";
-
-const projects = [
-  {
-    number: "01",
-    category: "E-COMMERCE",
-    title: "Luma Store",
-    description:
-      "A modern commerce experience designed to make online shopping simple and engaging.",
-    icon: FiShoppingBag,
-  },
-  {
-    number: "02",
-    category: "HEALTHCARE",
-    title: "CareFlow",
-    description:
-      "A digital healthcare platform connecting patients, services, and smarter workflows.",
-    icon: FiActivity,
-  },
-  {
-    number: "03",
-    category: "BUSINESS",
-    title: "Nexora",
-    description:
-      "A powerful analytics dashboard helping teams understand performance and make better decisions.",
-    icon: FiBarChart2,
-  },
-];
+import { getContentItems } from "../services/contentApi";
 
 function Projects() {
+  const [projects, setProjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getContentItems()
+      .then((data) => {
+        setProjects(data);
+      })
+      .catch((error) => {
+        console.error("Error loading projects:", error);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, []);
+
+  const getProjectIcon = (category) => {
+    switch (category?.toLowerCase()) {
+      case "e-commerce":
+      case "ecommerce":
+        return FiShoppingBag;
+
+      case "healthcare":
+        return FiActivity;
+
+      case "business":
+      case "technology":
+        return FiBarChart2;
+
+      default:
+        return FiBarChart2;
+    }
+  };
+
   return (
     <section className="projects-section" id="projects">
       <div className="section-container">
@@ -59,68 +68,77 @@ function Projects() {
           </p>
         </motion.div>
 
-        <div className="projects-list">
-          {projects.map((project, index) => {
-            const Icon = project.icon;
+        {loading ? (
+          <p>Loading projects...</p>
+        ) : (
+          <div className="projects-list">
+            {projects.map((project, index) => {
+              const Icon = getProjectIcon(project.category);
 
-            return (
-              <motion.article
-                className="project-card"
-                key={project.number}
-                initial={{ opacity: 0, y: 50 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.15 }}
-                transition={{
-                  duration: 0.7,
-                  delay: index * 0.12,
-                }}
-                whileHover={{ y: -6 }}
-              >
-                <div className="project-visual">
-                  <div className="project-glow"></div>
+              return (
+                <motion.article
+                  className="project-card"
+                  key={project.id}
+                  initial={{ opacity: 0, y: 50 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, amount: 0.15 }}
+                  transition={{
+                    duration: 0.7,
+                    delay: index * 0.12,
+                  }}
+                  whileHover={{ y: -6 }}
+                >
+                  <div className="project-visual">
+                    <div className="project-glow"></div>
 
-                  <div className="project-window">
-                    <div className="project-window-header">
-                      <div>
-                        <span></span>
-                        <span></span>
-                        <span></span>
+                    <div className="project-window">
+                      <div className="project-window-header">
+                        <div>
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </div>
+
+                        <small>
+                          {project.title.toLowerCase()}.app
+                        </small>
                       </div>
 
-                      <small>{project.title.toLowerCase()}.app</small>
-                    </div>
+                      <div className="project-window-content">
+                        <Icon className="project-main-icon" />
 
-                    <div className="project-window-content">
-                      <Icon className="project-main-icon" />
-
-                      <div className="project-lines">
-                        <span></span>
-                        <span></span>
-                        <span></span>
+                        <div className="project-lines">
+                          <span></span>
+                          <span></span>
+                          <span></span>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="project-info">
-                  <div className="project-meta">
-                    <span>{project.number}</span>
-                    <span>{project.category}</span>
+                  <div className="project-info">
+                    <div className="project-meta">
+                      <span>
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+
+                      <span>{project.category}</span>
+                    </div>
+
+                    <h3>{project.title}</h3>
+
+                    <p>{project.description}</p>
+
+                    <a href="#contact">
+                      View Project
+                      <FiArrowUpRight />
+                    </a>
                   </div>
-
-                  <h3>{project.title}</h3>
-
-                  <p>{project.description}</p>
-
-                  <a href="#contact">
-                    View Project
-                    <FiArrowUpRight />
-                  </a>
-                </div>
-              </motion.article>
-            );
-          })}
-        </div>
+                </motion.article>
+              );
+            })}
+          </div>
+        )}
       </div>
     </section>
   );

@@ -1,4 +1,6 @@
+import { useState } from "react";
 import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import Hero from "./components/Hero";
@@ -11,10 +13,14 @@ import CTA from "./components/CTA";
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 
-function App() {
+import ContentManagement from "./pages/ContentManagement";
+
+function Home() {
+  const [showContentManagement, setShowContentManagement] = useState(false);
+
   return (
     <>
-      <Navbar />
+      <Navbar onAdminClick={() => setShowContentManagement(true)} />
 
       <main>
         <Hero />
@@ -28,7 +34,23 @@ function App() {
       </main>
 
       <Footer />
+
+      {showContentManagement && (
+        <ContentManagement
+          onClose={() => setShowContentManagement(false)}
+        />
+      )}
     </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 

@@ -1,0 +1,363 @@
+import { useEffect, useState } from "react";
+import "./ContentManagement.css";
+
+import {
+  FiPlus,
+  FiEdit2,
+  FiTrash2,
+  FiX,
+  FiSettings,
+} from "react-icons/fi";
+
+const API_URL = "http://127.0.0.1:8000/api/content";
+
+const emptyForm = {
+  title: "",
+  description: "",
+  category: "",
+  image_url: "",
+  status: "published",
+};
+
+function ContentManagement({ onClose }) {
+  const [items, setItems] = useState([]);
+  const [form, setForm] = useState(emptyForm);
+  const [editingId, setEditingId] = useState(null);
+  const [showForm, setShowForm] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  const fetchItems = async () => {
+    try {
+      const response = await fetch(`${API_URL}/`);
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch content");
+      }
+
+      const data = await response.json();
+      setItems(data);
+    } catch (error) {
+      console.error("Error loading content:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchItems();
+  }, []);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    try {
+      const url = editingId
+        ? `${API_URL}/${editingId}`
+        : `${API_URL}/`;
+
+      const method = editingId ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save content");
+      }
+
+      await fetchItems();
+
+      setForm(emptyForm);
+      setEditingId(null);
+      setShowForm(false);
+    } catch (error) {
+      console.error("Error saving content:", error);
+    }
+  };
+
+  const handleEdit = (item) => {
+    setForm({
+      title: item.title,
+      description: item.description,
+      category: item.category,
+      image_url: item.image_url || "",
+      status: item.status,
+    });
+
+    setEditingId(item.id);
+    setShowForm(true);
+  };
+
+  const handleDelete = async (id) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this content?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete content");
+      }
+
+      await fetchItems();
+    } catch (error) {
+      console.error("Error deleting content:", error);
+    }
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingId(null);
+    setForm(emptyForm);
+  };
+
+  const handleOverlayClick = (event) => {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div
+      className="content-management-overlay"
+      onClick={handleOverlayClick}
+    >
+      <div className="content-management-card">
+
+        {/* Header */}
+        <div className="content-management-top">
+          <div className="content-management-title">
+            <div className="content-management-title-icon">
+              <FiSettings />
+            </div>
+
+            <div>
+              <h2>Content Management</h2>
+              <p>Manage your website content</p>
+            </div>
+          </div>
+
+          <button
+            className="content-management-close"
+            onClick={onClose}
+            aria-label="Close"
+          >
+            <FiX />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="content-management-body">
+
+          {/* Add Button */}
+          {!showForm && (
+            <button
+              className="content-submit-button"
+              onClick={() => {
+                setForm(emptyForm);
+                setEditingId(null);
+                setShowForm(true);
+              }}
+            >
+              <FiPlus />
+              Add New Content
+            </button>
+          )}
+
+          {/* Form */}
+          {showForm && (
+            <div className="content-form">
+              <div className="content-form-header">
+                <h3>
+                  {editingId ? "Edit Content" : "Add New Content"}
+                </h3>
+
+                <button
+                  className="content-management-close"
+                  onClick={closeForm}
+                  type="button"
+                >
+                  <FiX />
+                </button>
+              </div>
+
+              <form onSubmit={handleSubmit}>
+
+                <div className="content-form-group">
+                  <label>Title</label>
+
+                  <input
+                    type="text"
+                    name="title"
+                    value={form.title}
+                    onChange={handleChange}
+                    placeholder="Enter title"
+                    required
+                  />
+                </div>
+
+                <div className="content-form-group">
+                  <label>Category</label>
+
+                  <input
+                    type="text"
+                    name="category"
+                    value={form.category}
+                    onChange={handleChange}
+                    placeholder="e.g. Web Development"
+                    required
+                  />
+                </div>
+
+                <div className="content-form-group">
+                  <label>Description</label>
+
+                  <textarea
+                    name="description"
+                    value={form.description}
+                    onChange={handleChange}
+                    placeholder="Enter description"
+                    required
+                  />
+                </div>
+
+                <div className="content-form-group">
+                  <label>Image URL</label>
+
+                  <input
+                    type="url"
+                    name="image_url"
+                    value={form.image_url}
+                    onChange={handleChange}
+                    placeholder="https://..."
+                  />
+                </div>
+
+                <div className="content-form-group">
+                  <label>Status</label>
+
+                  <select
+                    name="status"
+                    value={form.status}
+                    onChange={handleChange}
+                  >
+                    <option value="published">Published</option>
+                    <option value="draft">Draft</option>
+                  </select>
+                </div>
+
+                <div className="content-form-actions">
+                  <button
+                    type="button"
+                    className="content-cancel-button"
+                    onClick={closeForm}
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="content-submit-button"
+                  >
+                    {editingId
+                      ? "Update Content"
+                      : "Create Content"}
+                  </button>
+                </div>
+
+              </form>
+            </div>
+          )}
+
+          {/* Content List */}
+          <div className="content-items-section">
+
+            <div className="content-items-header">
+              <h3>Current Content</h3>
+
+              <span className="content-items-count">
+                {items.length}{" "}
+                {items.length === 1 ? "item" : "items"}
+              </span>
+            </div>
+
+            {loading ? (
+              <div className="content-loading">
+                Loading content...
+              </div>
+            ) : items.length === 0 ? (
+              <div className="content-empty">
+                No content available.
+              </div>
+            ) : (
+              items.map((item, index) => (
+                <article
+                  className="content-item"
+                  key={item.id}
+                >
+                  <div className="content-item-info">
+
+                    <div className="content-item-meta">
+                      <span className="content-item-number">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+
+                      <span className="content-item-category">
+                        {item.category}
+                      </span>
+                    </div>
+
+                    <h4>{item.title}</h4>
+
+                    <p>{item.description}</p>
+                  </div>
+
+                  <div className="content-item-actions">
+
+                    <button
+                      className="content-edit-button"
+                      onClick={() => handleEdit(item)}
+                      title="Edit"
+                    >
+                      <FiEdit2 />
+                    </button>
+
+                    <button
+                      className="content-delete-button"
+                      onClick={() => handleDelete(item.id)}
+                      title="Delete"
+                    >
+                      <FiTrash2 />
+                    </button>
+
+                  </div>
+                </article>
+              ))
+            )}
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default ContentManagement;

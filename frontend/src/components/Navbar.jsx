@@ -4,9 +4,10 @@ import {
   FiArrowUpRight,
   FiMenu,
   FiX,
+  FiSettings,
 } from "react-icons/fi";
 
-function Navbar() {
+function Navbar({ onAdminClick }) {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const navItems = [
@@ -19,6 +20,11 @@ function Navbar() {
 
   const closeMenu = () => {
     setMenuOpen(false);
+  };
+
+  const handleAdminClick = () => {
+    closeMenu();
+    onAdminClick();
   };
 
   return (
@@ -52,6 +58,22 @@ function Navbar() {
               {item.label}
             </motion.a>
           ))}
+
+          {/* Admin Button */}
+          <motion.button
+            type="button"
+            className="nav-admin"
+            onClick={handleAdminClick}
+            whileHover={{
+              y: -2,
+              boxShadow:
+                "0 0 20px rgba(0, 229, 255, 0.18)",
+            }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <FiSettings />
+            Admin
+          </motion.button>
         </div>
 
         <motion.a
@@ -116,6 +138,16 @@ function Navbar() {
                 {item.label}
               </motion.a>
             ))}
+
+            {/* Mobile Admin Button */}
+            <motion.button
+              type="button"
+              className="mobile-admin-button"
+              onClick={handleAdminClick}
+            >
+              <FiSettings />
+              Admin
+            </motion.button>
 
             <motion.a
               href="#contact"

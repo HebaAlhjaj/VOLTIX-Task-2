@@ -1,9 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
 from app.api.routes.contact import router as contact_router
+from app.api.routes.content import router as content_router
 
-app = FastAPI()
+app = FastAPI(
+    title="NOVATECH API",
+    version="1.0.0",
+)
 
+# CORS - Allow React frontend to access the API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -16,8 +22,11 @@ app.add_middleware(
 )
 
 app.include_router(contact_router)
+app.include_router(content_router)
 
 
 @app.get("/")
 def root():
-    return {"message": "Company Landing Page API is running"}
+    return {
+        "message": "NOVATECH API is running"
+    }
