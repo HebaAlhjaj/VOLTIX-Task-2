@@ -8,6 +8,8 @@ from app.schemas.content import (
     ContentResponse,
     ContentUpdate,
 )
+from app.core.dependencies import get_current_user
+
 
 router = APIRouter(
     prefix="/api/content",
@@ -16,8 +18,11 @@ router = APIRouter(
 
 
 # GET - Get all content items
+# Public - does not require login
 @router.get("/", response_model=list[ContentResponse])
-def get_content_items(db: Session = Depends(get_db)):
+def get_content_items(
+    db: Session = Depends(get_db),
+):
     return (
         db.query(ContentItem)
         .order_by(ContentItem.created_at.desc())
@@ -26,6 +31,7 @@ def get_content_items(db: Session = Depends(get_db)):
 
 
 # GET - Get one content item
+# Public - does not require login
 @router.get("/{content_id}", response_model=ContentResponse)
 def get_content_item(
     content_id: int,
@@ -47,6 +53,7 @@ def get_content_item(
 
 
 # POST - Create content item
+# Protected - requires login
 @router.post(
     "/",
     response_model=ContentResponse,
@@ -55,6 +62,7 @@ def get_content_item(
 def create_content_item(
     content: ContentCreate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     new_item = ContentItem(
         title=content.title,
@@ -72,6 +80,7 @@ def create_content_item(
 
 
 # PUT - Update content item
+# Protected - requires login
 @router.put(
     "/{content_id}",
     response_model=ContentResponse,
@@ -80,6 +89,7 @@ def update_content_item(
     content_id: int,
     content: ContentUpdate,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     item = (
         db.query(ContentItem)
@@ -106,12 +116,12 @@ def update_content_item(
 
 
 # DELETE - Delete content item
-@router.delete(
-    "/{content_id}",
-)
+# Protected - requires login
+@router.delete("/{content_id}")
 def delete_content_item(
     content_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(get_current_user),
 ):
     item = (
         db.query(ContentItem)

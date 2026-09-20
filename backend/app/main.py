@@ -3,11 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.api.routes.contact import router as contact_router
 from app.api.routes.content import router as content_router
-
+from app.api.routes.auth import router as auth_router
+from app.api.routes.users import router as users_router
+from app.api.routes.services import router as services_router
 app = FastAPI(
     title="NOVATECH API",
     version="1.0.0",
 )
+
 
 # CORS - Allow React frontend to access the API
 app.add_middleware(
@@ -21,8 +24,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
+# API Routes
 app.include_router(contact_router)
 app.include_router(content_router)
+app.include_router(auth_router)
+app.include_router(users_router)
+app.include_router(services_router)
 
 
 @app.get("/")

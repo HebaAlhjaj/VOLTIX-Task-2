@@ -5,10 +5,14 @@ import {
   FiMenu,
   FiX,
   FiSettings,
+  FiTool,
+  FiLogOut,
 } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
 
-function Navbar({ onAdminClick }) {
+function Navbar({ onAdminClick, onServiceAdminClick }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const navigate = useNavigate();
 
   const navItems = [
     { label: "Home", href: "#home" },
@@ -24,8 +28,44 @@ function Navbar({ onAdminClick }) {
 
   const handleAdminClick = () => {
     closeMenu();
-    onAdminClick();
+
+    const token = localStorage.getItem("access_token");
+
+    if (token) {
+      onAdminClick();
+    } else {
+      navigate("/login");
+    }
   };
+
+  const handleServiceAdminClick = () => {
+    closeMenu();
+
+    console.log("SERVICES BUTTON CLICKED");
+    console.log(
+      "Service handler:",
+      onServiceAdminClick
+    );
+
+    if (onServiceAdminClick) {
+      console.log("OPENING SERVICE MANAGEMENT");
+      onServiceAdminClick();
+    } else {
+      console.error(
+        "ERROR: onServiceAdminClick is undefined"
+      );
+    }
+  };
+
+  const handleLogout = () => {
+    closeMenu();
+    localStorage.removeItem("access_token");
+    navigate("/login");
+  };
+
+  const isLoggedIn = Boolean(
+    localStorage.getItem("access_token")
+  );
 
   return (
     <>
@@ -59,7 +99,7 @@ function Navbar({ onAdminClick }) {
             </motion.a>
           ))}
 
-          {/* Admin Button */}
+          {/* Content Management */}
           <motion.button
             type="button"
             className="nav-admin"
@@ -74,6 +114,40 @@ function Navbar({ onAdminClick }) {
             <FiSettings />
             Admin
           </motion.button>
+
+          {/* Service Management */}
+          <motion.button
+            type="button"
+            className="nav-admin"
+            onClick={handleServiceAdminClick}
+            whileHover={{
+              y: -2,
+              boxShadow:
+                "0 0 20px rgba(0, 229, 255, 0.18)",
+            }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <FiTool />
+            Services
+          </motion.button>
+
+          {/* Logout */}
+          {isLoggedIn && (
+            <motion.button
+              type="button"
+              className="nav-admin"
+              onClick={handleLogout}
+              whileHover={{
+                y: -2,
+                boxShadow:
+                  "0 0 20px rgba(0, 229, 255, 0.18)",
+              }}
+              whileTap={{ scale: 0.97 }}
+            >
+              <FiLogOut />
+              Logout
+            </motion.button>
+          )}
         </div>
 
         <motion.a
@@ -93,8 +167,12 @@ function Navbar({ onAdminClick }) {
         <button
           className="mobile-menu-button"
           type="button"
-          aria-label={menuOpen ? "Close menu" : "Open menu"}
-          onClick={() => setMenuOpen((prev) => !prev)}
+          aria-label={
+            menuOpen ? "Close menu" : "Open menu"
+          }
+          onClick={() =>
+            setMenuOpen((prev) => !prev)
+          }
         >
           {menuOpen ? <FiX /> : <FiMenu />}
         </button>
@@ -139,7 +217,7 @@ function Navbar({ onAdminClick }) {
               </motion.a>
             ))}
 
-            {/* Mobile Admin Button */}
+            {/* Mobile Content Management */}
             <motion.button
               type="button"
               className="mobile-admin-button"
@@ -148,6 +226,28 @@ function Navbar({ onAdminClick }) {
               <FiSettings />
               Admin
             </motion.button>
+
+            {/* Mobile Service Management */}
+            <motion.button
+              type="button"
+              className="mobile-admin-button"
+              onClick={handleServiceAdminClick}
+            >
+              <FiTool />
+              Services
+            </motion.button>
+
+            {/* Mobile Logout */}
+            {isLoggedIn && (
+              <motion.button
+                type="button"
+                className="mobile-admin-button"
+                onClick={handleLogout}
+              >
+                <FiLogOut />
+                Logout
+              </motion.button>
+            )}
 
             <motion.a
               href="#contact"

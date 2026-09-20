@@ -9,7 +9,12 @@ import {
   FiSettings,
 } from "react-icons/fi";
 
-const API_URL = "http://127.0.0.1:8000/api/content";
+import {
+  getContentItems,
+  createContentItem,
+  updateContentItem,
+  deleteContentItem,
+} from "../services/contentApi";
 
 const emptyForm = {
   title: "",
@@ -28,13 +33,7 @@ function ContentManagement({ onClose }) {
 
   const fetchItems = async () => {
     try {
-      const response = await fetch(`${API_URL}/`);
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch content");
-      }
-
-      const data = await response.json();
+      const data = await getContentItems();
       setItems(data);
     } catch (error) {
       console.error("Error loading content:", error);
@@ -60,22 +59,10 @@ function ContentManagement({ onClose }) {
     event.preventDefault();
 
     try {
-      const url = editingId
-        ? `${API_URL}/${editingId}`
-        : `${API_URL}/`;
-
-      const method = editingId ? "PUT" : "POST";
-
-      const response = await fetch(url, {
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(form),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to save content");
+      if (editingId) {
+        await updateContentItem(editingId, form);
+      } else {
+        await createContentItem(form);
       }
 
       await fetchItems();
@@ -109,14 +96,7 @@ function ContentManagement({ onClose }) {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
-        method: "DELETE",
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to delete content");
-      }
-
+      await deleteContentItem(id);
       await fetchItems();
     } catch (error) {
       console.error("Error deleting content:", error);
@@ -185,6 +165,7 @@ function ContentManagement({ onClose }) {
           {/* Form */}
           {showForm && (
             <div className="content-form">
+
               <div className="content-form-header">
                 <h3>
                   {editingId ? "Edit Content" : "Add New Content"}
@@ -265,6 +246,7 @@ function ContentManagement({ onClose }) {
                 </div>
 
                 <div className="content-form-actions">
+
                   <button
                     type="button"
                     className="content-cancel-button"
@@ -281,8 +263,8 @@ function ContentManagement({ onClose }) {
                       ? "Update Content"
                       : "Create Content"}
                   </button>
-                </div>
 
+                </div>
               </form>
             </div>
           )}
@@ -328,6 +310,7 @@ function ContentManagement({ onClose }) {
                     <h4>{item.title}</h4>
 
                     <p>{item.description}</p>
+
                   </div>
 
                   <div className="content-item-actions">

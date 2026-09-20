@@ -45,7 +45,7 @@ function Login() {
       }
 
       localStorage.setItem("access_token", data.access_token);
-      navigate("/");
+      navigate("/dashboard");
     } catch (error) {
       setError(error.message);
     } finally {

@@ -14,13 +14,20 @@ import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 
 import ContentManagement from "./pages/ContentManagement";
+import ServiceManagement from "./components/ServiceManagement";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
 
 function Home() {
   const [showContentManagement, setShowContentManagement] = useState(false);
+  const [showServiceManagement, setShowServiceManagement] = useState(false);
 
   return (
     <>
-      <Navbar onAdminClick={() => setShowContentManagement(true)} />
+      <Navbar
+        onAdminClick={() => setShowContentManagement(true)}
+        onServiceAdminClick={() => setShowServiceManagement(true)}
+      />
 
       <main>
         <Hero />
@@ -40,6 +47,12 @@ function Home() {
           onClose={() => setShowContentManagement(false)}
         />
       )}
+
+      {showServiceManagement && (
+        <ServiceManagement
+          onClose={() => setShowServiceManagement(false)}
+        />
+      )}
     </>
   );
 }
@@ -49,6 +62,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
     </BrowserRouter>
   );
