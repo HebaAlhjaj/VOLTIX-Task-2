@@ -1,17 +1,37 @@
 import { useEffect, useState } from "react";
+import {
+  createRequest,
+  getMyRequests,
+} from "../services/requestApi";
 
 function Dashboard() {
   const [user, setUser] = useState(null);
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
   });
 
+  const [requestForm, setRequestForm] = useState({
+    service: "",
+    subject: "",
+    description: "",
+  });
+
+  const [requests, setRequests] = useState([]);
+
   const [loading, setLoading] = useState(true);
+  const [requestsLoading, setRequestsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [submittingRequest, setSubmittingRequest] = useState(false);
+
   const [editing, setEditing] = useState(false);
+
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  const [requestMessage, setRequestMessage] = useState("");
+  const [requestError, setRequestError] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
@@ -52,9 +72,34 @@ function Dashboard() {
       });
   }, []);
 
+  useEffect(() => {
+    loadRequests();
+  }, []);
+
+  const loadRequests = async () => {
+    try {
+      setRequestsLoading(true);
+
+      const data = await getMyRequests();
+
+      setRequests(data);
+    } catch (error) {
+      setRequestError(error.message);
+    } finally {
+      setRequestsLoading(false);
+    }
+  };
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleRequestChange = (e) => {
+    setRequestForm({
+      ...requestForm,
       [e.target.name]: e.target.value,
     });
   };
@@ -104,7 +149,9 @@ function Dashboard() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || "Failed to update profile");
+        throw new Error(
+          data.detail || "Failed to update profile"
+        );
       }
 
       setUser(data);
@@ -123,6 +170,34 @@ function Dashboard() {
     }
   };
 
+  const handleSubmitRequest = async (e) => {
+    e.preventDefault();
+
+    setSubmittingRequest(true);
+    setRequestMessage("");
+    setRequestError("");
+
+    try {
+      await createRequest(requestForm);
+
+      setRequestForm({
+        service: "",
+        subject: "",
+        description: "",
+      });
+
+      setRequestMessage(
+        "Your request has been submitted successfully."
+      );
+
+      await loadRequests();
+    } catch (error) {
+      setRequestError(error.message);
+    } finally {
+      setSubmittingRequest(false);
+    }
+  };
+
   const handleLogout = () => {
     localStorage.removeItem("access_token");
     window.location.href = "/login";
@@ -130,6 +205,22 @@ function Dashboard() {
 
   const handleBackToHome = () => {
     window.location.href = "/";
+  };
+
+  const getStatusClass = (status) => {
+    switch (status) {
+      case "Completed":
+        return "request-status completed";
+
+      case "In Progress":
+        return "request-status in-progress";
+
+      case "Rejected":
+        return "request-status rejected";
+
+      default:
+        return "request-status pending";
+    }
   };
 
   if (loading) {
@@ -144,6 +235,7 @@ function Dashboard() {
     <div className="dashboard-page">
       <div className="dashboard-container">
 
+        {/* Header */}
         <div className="dashboard-header">
           <div>
             <p className="dashboard-label">
@@ -155,7 +247,7 @@ function Dashboard() {
             </h1>
 
             <p>
-              Manage your account information.
+              Manage your account and service requests.
             </p>
           </div>
 
@@ -176,6 +268,8 @@ function Dashboard() {
           </div>
         </div>
 
+
+        {/* Account Information */}
         <div className="profile-card">
 
           <div className="profile-card-header">
@@ -296,9 +390,210 @@ function Dashboard() {
           )}
 
         </div>
+
+
+        {/* Submit Request */}
+        <div className="request-card">
+
+          <div className="request-card-header">
+            <div>
+              <p className="dashboard-label">
+                SERVICE REQUEST
+              </p>
+
+              <h2>Submit a Request</h2>
+
+              <p>
+                Tell us what you need and our team will
+                review your request.
+              </p>
+            </div>
+          </div>
+
+          {requestMessage && (
+            <div className="success-message">
+              {requestMessage}
+            </div>
+          )}
+
+          {requestError && (
+            <div className="profile-error">
+              {requestError}
+            </div>
+          )}
+
+          <form
+            className="request-form"
+            onSubmit={handleSubmitRequest}
+          >
+
+            <div className="request-input-group">
+              <label>Service</label>
+
+              <select
+                name="service"
+                value={requestForm.service}
+                onChange={handleRequestChange}
+                required
+              >
+                <option value="">
+                  Select a service
+                </option>
+
+                <option value="Web Development">
+                  Web Development
+                </option>
+
+                <option value="UI/UX Design">
+                  UI/UX Design
+                </option>
+
+                <option value="Mobile Development">
+                  Mobile Development
+                </option>
+
+                <option value="Digital Solutions">
+                  Digital Solutions
+                </option>
+              </select>
+            </div>
+
+
+            <div className="request-input-group">
+              <label>Subject</label>
+
+              <input
+                type="text"
+                name="subject"
+                value={requestForm.subject}
+                onChange={handleRequestChange}
+                placeholder="What do you need?"
+                required
+              />
+            </div>
+
+
+            <div className="request-input-group request-full-width">
+              <label>Description</label>
+
+              <textarea
+                name="description"
+                value={requestForm.description}
+                onChange={handleRequestChange}
+                placeholder="Describe your request..."
+                rows="5"
+                required
+              />
+            </div>
+
+
+            <button
+              type="submit"
+              className="request-submit-button"
+              disabled={submittingRequest}
+            >
+              {submittingRequest
+                ? "Submitting..."
+                : "Submit Request"}
+            </button>
+
+          </form>
+
+        </div>
+
+
+        {/* My Requests */}
+        <div className="request-card">
+
+          <div className="request-card-header">
+            <div>
+              <p className="dashboard-label">
+                REQUEST HISTORY
+              </p>
+
+              <h2>My Requests</h2>
+
+              <p>
+                Track the status of your submitted service
+                requests.
+              </p>
+            </div>
+          </div>
+
+
+          {requestsLoading ? (
+            <div className="requests-loading">
+              Loading your requests...
+            </div>
+          ) : requests.length === 0 ? (
+            <div className="empty-requests">
+              <h3>No requests yet</h3>
+
+              <p>
+                Submit your first service request above.
+              </p>
+            </div>
+          ) : (
+            <div className="requests-list">
+
+              {requests.map((request) => (
+                <div
+                  className="request-item"
+                  key={request.id}
+                >
+
+                  <div className="request-item-main">
+
+                    <div>
+                      <span className="request-service">
+                        {request.service}
+                      </span>
+
+                      <h3>
+                        {request.subject}
+                      </h3>
+
+                      <p>
+                        {request.description}
+                      </p>
+                    </div>
+
+                    <span
+                      className={getStatusClass(
+                        request.status
+                      )}
+                    >
+                      {request.status}
+                    </span>
+
+                  </div>
+
+                  <div className="request-item-footer">
+                    <span>
+                      Request #{request.id}
+                    </span>
+
+                    <span>
+                      {request.created_at
+                        ? new Date(
+                            request.created_at
+                          ).toLocaleDateString()
+                        : "-"}
+                    </span>
+                  </div>
+
+                </div>
+              ))}
+
+            </div>
+          )}
+
+        </div>
+
       </div>
     </div>
   );
 }
 
 export default Dashboard;
+

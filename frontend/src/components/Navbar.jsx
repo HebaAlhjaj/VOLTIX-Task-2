@@ -10,7 +10,11 @@ import {
 } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
 
-function Navbar({ onAdminClick, onServiceAdminClick }) {
+function Navbar({
+  onAdminClick,
+  onServiceAdminClick,
+  onRequestAdminClick,
+}) {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
 
@@ -41,24 +45,22 @@ function Navbar({ onAdminClick, onServiceAdminClick }) {
   const handleServiceAdminClick = () => {
     closeMenu();
 
-    console.log("SERVICES BUTTON CLICKED");
-    console.log(
-      "Service handler:",
-      onServiceAdminClick
-    );
-
     if (onServiceAdminClick) {
-      console.log("OPENING SERVICE MANAGEMENT");
       onServiceAdminClick();
-    } else {
-      console.error(
-        "ERROR: onServiceAdminClick is undefined"
-      );
+    }
+  };
+
+  const handleRequestAdminClick = () => {
+    closeMenu();
+
+    if (onRequestAdminClick) {
+      onRequestAdminClick();
     }
   };
 
   const handleLogout = () => {
     closeMenu();
+
     localStorage.removeItem("access_token");
     navigate("/login");
   };

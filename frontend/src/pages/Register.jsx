@@ -1,37 +1,36 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  FiEye,
-  FiEyeOff,
-  FiGithub,
-  FiArrowLeft,
-} from "react-icons/fi";
-import { FcGoogle } from "react-icons/fc";
+import { FiEye, FiEyeOff, FiArrowLeft } from "react-icons/fi";
 import "./Login.css";
 
-function Login() {
+function Register() {
   const navigate = useNavigate();
 
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleRegister = async (e) => {
     e.preventDefault();
+
     setError("");
+    setSuccess("");
     setLoading(true);
 
     try {
       const response = await fetch(
-        "http://127.0.0.1:8000/api/auth/login",
+        "http://127.0.0.1:8000/api/auth/register",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
+            name,
             email,
             password,
           }),
@@ -41,13 +40,16 @@ function Login() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.detail || "Login failed");
+        throw new Error(data.detail || "Registration failed");
       }
 
-      localStorage.setItem("access_token", data.access_token);
-      navigate("/dashboard");
+      setSuccess("Account created successfully!");
+
+      setTimeout(() => {
+        navigate("/login");
+      }, 1200);
     } catch (error) {
-      setError(error.message);
+      setError(error.message || "Registration failed");
     } finally {
       setLoading(false);
     }
@@ -55,7 +57,6 @@ function Login() {
 
   return (
     <div className="login-page">
-
       {/* LEFT SIDE */}
       <div className="login-visual">
         <div className="visual-grid"></div>
@@ -107,23 +108,32 @@ function Login() {
 
       {/* RIGHT SIDE */}
       <div className="login-form-side">
-
         <div className="login-card">
-
           <div className="login-heading">
             <span className="login-small-title">
-              WELCOME BACK
+              JOIN NOVATECH
             </span>
 
-            <h1>Sign in</h1>
+            <h1>Create Account</h1>
 
             <p>
-              Enter your details to access your
-              NOVATECH account.
+              Create your account to get started
+              with NOVATECH.
             </p>
           </div>
 
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleRegister}>
+            <div className="login-input-group">
+              <label>Name</label>
+
+              <input
+                type="text"
+                placeholder="Enter your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+              />
+            </div>
 
             <div className="login-input-group">
               <label>Email</label>
@@ -142,17 +152,12 @@ function Login() {
 
               <div className="password-wrapper">
                 <input
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
+                  type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   value={password}
-                  onChange={(e) =>
-                    setPassword(e.target.value)
-                  }
+                  onChange={(e) => setPassword(e.target.value)}
                   required
+                  minLength={6}
                 />
 
                 <button
@@ -182,53 +187,36 @@ function Login() {
               </div>
             )}
 
+            {success && (
+              <div className="login-success">
+                {success}
+              </div>
+            )}
+
             <button
               type="submit"
               className="login-submit"
               disabled={loading}
             >
-              {loading ? "Signing in..." : "Sign in"}
+              {loading
+                ? "Creating account..."
+                : "Create Account"}
             </button>
           </form>
-<button
-  type="button"
-  className="register-link"
-  onClick={() => navigate("/register")}
->
-  Don't have an account? <span>Create Account</span>
-</button>
-          <div className="login-divider">
-            <span>OR CONTINUE WITH</span>
-          </div>
 
-          <div className="social-login">
-
-            <button
-              type="button"
-              className="social-button"
-            >
-              <FiGithub />
-              <span>GitHub</span>
-            </button>
-
-            <button
-              type="button"
-              className="social-button"
-            >
-              <FcGoogle />
-              <span>Google</span>
-            </button>
-
-          </div>
-
-          <p className="login-note">
-            Social login will be available soon.
-          </p>
-
+          <button
+            type="button"
+            className="register-link"
+            onClick={() => navigate("/login")}
+          >
+            Already have an account?{" "}
+            <span>Sign in</span>
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-export default Login;
+export default Register;
+

@@ -1,15 +1,26 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.database.connection import Base, engine
+
+from app.models.customer_request import CustomerRequest
+
 from app.api.routes.contact import router as contact_router
 from app.api.routes.content import router as content_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.users import router as users_router
 from app.api.routes.services import router as services_router
+from app.api.routes.requests import router as requests_router
+
+
 app = FastAPI(
     title="NOVATECH API",
     version="1.0.0",
 )
+
+
+# Create database tables
+Base.metadata.create_all(bind=engine)
 
 
 # CORS - Allow React frontend to access the API
@@ -31,6 +42,7 @@ app.include_router(content_router)
 app.include_router(auth_router)
 app.include_router(users_router)
 app.include_router(services_router)
+app.include_router(requests_router)
 
 
 @app.get("/")
@@ -38,3 +50,4 @@ def root():
     return {
         "message": "NOVATECH API is running"
     }
+
