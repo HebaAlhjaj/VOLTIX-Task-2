@@ -3397,6 +3397,684 @@
   }
 }
 /* ========================================
+   CUSTOMER REQUEST MANAGEMENT
+======================================== */
+
+.admin-request-section {
+  width: 100%;
+  padding-top: 4px;
+}
+
+/* ========================================
+   HEADER
+======================================== */
+
+.request-management-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 22px;
+}
+
+.request-management-header h2 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: 21px;
+  font-weight: 650;
+  letter-spacing: -0.4px;
+  line-height: 1.2;
+}
+
+.request-management-header p {
+  margin: 7px 0 0;
+  color: #64748b;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+/* ========================================
+   REFRESH BUTTON
+======================================== */
+
+.request-refresh-button {
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 10px;
+
+  background: rgba(255, 255, 255, 0.025);
+  color: #94a3b8;
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.request-refresh-button:hover {
+  border-color: rgba(0, 229, 255, 0.3);
+  background: rgba(0, 229, 255, 0.06);
+  color: #00e5ff;
+  transform: translateY(-1px);
+}
+
+.request-refresh-button svg {
+  font-size: 15px;
+}
+
+/* ========================================
+   SEARCH & FILTERS
+======================================== */
+
+.request-search-panel {
+  margin-bottom: 22px;
+  padding: 18px;
+
+  border: 1px solid rgba(148, 163, 184, 0.09);
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(13, 28, 43, 0.55),
+      rgba(5, 11, 20, 0.72)
+    );
+}
+
+.request-search-header {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+
+.request-search-header svg {
+  color: #00e5ff;
+  font-size: 15px;
+}
+
+.request-search-title {
+  color: #e2e8f0;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.request-search-description {
+  margin: 3px 0 0;
+  color: #475569;
+  font-size: 10px;
+}
+
+/* ========================================
+   FILTER GRID
+======================================== */
+
+.request-filters {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) 165px 165px auto;
+  gap: 9px;
+  align-items: end;
+}
+
+/* ========================================
+   SEARCH INPUT
+======================================== */
+
+.request-search-input-wrapper {
+  position: relative;
+}
+
+.request-search-input-wrapper > svg {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+
+  transform: translateY(-50%);
+
+  color: #475569;
+  font-size: 14px;
+
+  pointer-events: none;
+}
+
+.request-search-input {
+  width: 100%;
+  min-height: 40px;
+  box-sizing: border-box;
+
+  padding: 0 36px 0 36px;
+
+  border: 1px solid rgba(148, 163, 184, 0.11);
+  border-radius: 8px;
+
+  outline: none;
+
+  background: rgba(255, 255, 255, 0.022);
+  color: #f8fafc;
+
+  font-family: inherit;
+  font-size: 11px;
+
+  transition: all 0.25s ease;
+}
+
+.request-search-input::placeholder {
+  color: #475569;
+}
+
+.request-search-input:focus {
+  border-color: rgba(0, 229, 255, 0.32);
+  background: rgba(0, 229, 255, 0.018);
+  box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.035);
+}
+
+/* ========================================
+   CLEAR SEARCH
+======================================== */
+
+.request-clear-search {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+
+  width: 23px;
+  height: 23px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transform: translateY(-50%);
+
+  border: none;
+  border-radius: 6px;
+
+  background: transparent;
+  color: #475569;
+
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.request-clear-search:hover {
+  color: #00e5ff;
+  background: rgba(0, 229, 255, 0.06);
+}
+
+/* ========================================
+   FILTER GROUP
+======================================== */
+
+.request-filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.request-filter-group label {
+  color: #475569;
+  font-size: 8px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.request-filter-group select {
+  width: 100%;
+  min-height: 40px;
+  box-sizing: border-box;
+
+  padding: 0 10px;
+
+  border: 1px solid rgba(148, 163, 184, 0.11);
+  border-radius: 8px;
+
+  outline: none;
+
+  background: rgba(255, 255, 255, 0.022);
+  color: #cbd5e1;
+
+  font-family: inherit;
+  font-size: 10px;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.request-filter-group select:hover {
+  border-color: rgba(148, 163, 184, 0.2);
+}
+
+.request-filter-group select:focus {
+  border-color: rgba(0, 229, 255, 0.32);
+  box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.035);
+}
+
+.request-filter-group select option {
+  background: #07111e;
+  color: #f8fafc;
+}
+
+/* ========================================
+   RESET BUTTON
+======================================== */
+
+.request-reset-button {
+  min-height: 40px;
+
+  padding: 0 12px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  border: 1px solid rgba(148, 163, 184, 0.11);
+  border-radius: 8px;
+
+  background: rgba(255, 255, 255, 0.022);
+  color: #64748b;
+
+  font-family: inherit;
+  font-size: 9px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.request-reset-button:hover {
+  border-color: rgba(0, 229, 255, 0.25);
+  background: rgba(0, 229, 255, 0.045);
+  color: #00e5ff;
+}
+
+/* ========================================
+   RESULTS HEADER
+======================================== */
+
+.request-results-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 10px;
+}
+
+.request-results-count {
+  color: #475569;
+  font-size: 10px;
+}
+
+.request-results-count strong {
+  margin-right: 3px;
+  color: #00e5ff;
+  font-size: 14px;
+}
+
+/* ========================================
+   REQUEST LIST
+======================================== */
+
+.request-list {
+  display: grid;
+  gap: 10px;
+}
+
+/* ========================================
+   REQUEST CARD
+======================================== */
+
+.admin-request-section .request-card {
+  position: relative;
+
+  padding: 18px;
+
+  border: 1px solid rgba(148, 163, 184, 0.08);
+  border-radius: 13px;
+
+  background: rgba(255, 255, 255, 0.018);
+
+  box-shadow: none;
+
+  transition:
+    border-color 0.25s ease,
+    background 0.25s ease,
+    transform 0.25s ease;
+}
+
+.admin-request-section .request-card:hover {
+  border-color: rgba(0, 229, 255, 0.16);
+  background: rgba(0, 229, 255, 0.022);
+  transform: translateY(-1px);
+}
+
+/* ========================================
+   CARD TOP
+======================================== */
+
+.request-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 18px;
+  margin-bottom: 10px;
+}
+
+.request-card-id {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #00e5ff;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+.request-card-title {
+  margin: 0;
+
+  color: #f1f5f9;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  line-height: 1.4;
+}
+
+.request-card-service {
+  display: inline-flex;
+  align-items: center;
+
+  margin-top: 7px;
+  padding: 4px 8px;
+
+  border: 1px solid rgba(0, 229, 255, 0.09);
+  border-radius: 999px;
+
+  background: rgba(0, 229, 255, 0.035);
+
+  color: #67e8f9;
+
+  font-size: 8px;
+  font-weight: 600;
+}
+
+/* ========================================
+   STATUS BADGE
+======================================== */
+
+.admin-request-section .request-status {
+  flex-shrink: 0;
+
+  padding: 5px 9px;
+
+  border-radius: 999px;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  white-space: nowrap;
+  letter-spacing: 0.2px;
+}
+
+.admin-request-section .request-status.pending {
+  border: 1px solid rgba(251, 191, 36, 0.13);
+  background: rgba(251, 191, 36, 0.045);
+  color: #fbbf24;
+}
+
+.admin-request-section .request-status.in-progress {
+  border: 1px solid rgba(0, 229, 255, 0.13);
+  background: rgba(0, 229, 255, 0.045);
+  color: #00e5ff;
+}
+
+.admin-request-section .request-status.completed {
+  border: 1px solid rgba(74, 222, 128, 0.13);
+  background: rgba(74, 222, 128, 0.045);
+  color: #4ade80;
+}
+
+.admin-request-section .request-status.rejected {
+  border: 1px solid rgba(248, 113, 113, 0.13);
+  background: rgba(248, 113, 113, 0.045);
+  color: #f87171;
+}
+
+/* ========================================
+   DESCRIPTION
+======================================== */
+
+.request-card-description {
+  margin: 0 0 13px;
+
+  color: #64748b;
+
+  font-size: 10px;
+  line-height: 1.7;
+}
+
+/* ========================================
+   META
+======================================== */
+
+.request-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 22px;
+
+  padding-top: 11px;
+
+  border-top: 1px solid rgba(148, 163, 184, 0.055);
+}
+
+.request-meta-item {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.request-meta-item span {
+  color: #3f4d60;
+
+  font-size: 7px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.request-meta-item strong {
+  color: #94a3b8;
+
+  font-size: 9px;
+  font-weight: 500;
+}
+
+/* ========================================
+   UPDATE STATUS
+======================================== */
+
+.request-status-update {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  margin-top: 13px;
+}
+
+.request-status-update label {
+  color: #475569;
+
+  font-size: 8px;
+  font-weight: 700;
+
+  text-transform: uppercase;
+  letter-spacing: 0.7px;
+}
+
+.request-status-update select {
+  min-height: 31px;
+
+  padding: 0 9px;
+
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  border-radius: 7px;
+
+  outline: none;
+
+  background: rgba(255, 255, 255, 0.022);
+  color: #cbd5e1;
+
+  font-family: inherit;
+  font-size: 9px;
+
+  cursor: pointer;
+
+  transition: all 0.25s ease;
+}
+
+.request-status-update select:hover {
+  border-color: rgba(148, 163, 184, 0.18);
+}
+
+.request-status-update select:focus {
+  border-color: rgba(0, 229, 255, 0.3);
+}
+
+.request-status-update select option {
+  background: #07111e;
+  color: #f8fafc;
+}
+
+/* ========================================
+   LOADING / EMPTY
+======================================== */
+
+.request-loading,
+.request-empty {
+  min-height: 190px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  text-align: center;
+
+  color: #475569;
+  font-size: 11px;
+
+  border: 1px dashed rgba(148, 163, 184, 0.09);
+  border-radius: 13px;
+
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.request-empty strong {
+  display: block;
+
+  margin-bottom: 4px;
+
+  color: #94a3b8;
+  font-size: 12px;
+}
+
+/* ========================================
+   ERROR
+======================================== */
+
+.request-error {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+
+  border: 1px solid rgba(248, 113, 113, 0.13);
+  border-radius: 8px;
+
+  background: rgba(248, 113, 113, 0.04);
+
+  color: #f87171;
+  font-size: 10px;
+}
+
+/* ========================================
+   RESPONSIVE
+======================================== */
+
+@media (max-width: 900px) {
+  .request-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .request-search-input-wrapper {
+    grid-column: 1 / -1;
+  }
+
+  .request-reset-button {
+    align-self: stretch;
+  }
+}
+
+@media (max-width: 600px) {
+  .request-management-header {
+    align-items: flex-start;
+  }
+
+  .request-management-header h2 {
+    font-size: 19px;
+  }
+
+  .request-search-panel {
+    padding: 15px;
+  }
+
+  .request-filters {
+    grid-template-columns: 1fr;
+  }
+
+  .request-search-input-wrapper {
+    grid-column: auto;
+  }
+
+  .admin-request-section .request-card {
+    padding: 15px;
+  }
+
+  .request-card-top {
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .admin-request-section .request-status {
+    align-self: flex-start;
+  }
+
+  .request-card-meta {
+    gap: 14px;
+  }
+
+  .request-status-update {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .request-status-update select {
+    width: 100%;
+  }
+}
+/* ========================================
    CUSTOMER DASHBOARD
 ======================================== */
 

@@ -1,12 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
+from sqlalchemy import or_
 
 from app.database.connection import get_db
 from app.core.dependencies import get_current_user
-
 from app.models.user import User
 from app.models.customer_request import CustomerRequest
-
 from app.schemas.customer_request import (
     CustomerRequestCreate,
     CustomerRequestResponse,
@@ -36,7 +35,11 @@ def create_request(
 ):
     user_id = int(current_user["sub"])
 
-    user = db.query(User).filter(User.id == user_id).first()
+    user = (
+        db.query(User)
+        .filter(User.id == user_id)
+        .first()
+    )
 
     if not user:
         raise HTTPException(
@@ -85,6 +88,7 @@ def get_my_requests(
 
 # --------------------------------------------------
 # Company/Admin - Get All Requests
+# Search + Filtering
 # --------------------------------------------------
 
 @router.get(
@@ -92,12 +96,33 @@ def get_my_requests(
     response_model=list[CustomerRequestResponse],
 )
 def get_all_requests(
+    search: str | None = Query(
+        default=None,
+        description="Search by subject, description, or service",
+    ),
+    status_filter: str | None = Query(
+        default=None,
+        alias="status",
+        description="Filter by request status",
+    ),
+    service: str | None = Query(
+        default=None,
+        description="Filter by service",
+    ),
     db: Session = Depends(get_db),
     current_user=Depends(get_current_user),
 ):
+    # ----------------------------------------------
+    # Check admin
+    # ----------------------------------------------
+
     user_id = int(current_user["sub"])
 
-    user = db.query(User).filter(User.id == user_id).first()
+    user = (
+        db.query(User)
+        .filter(User.id == user_id)
+        .first()
+    )
 
     if not user:
         raise HTTPException(
@@ -111,8 +136,55 @@ def get_all_requests(
             detail="Admin access required",
         )
 
+    # ----------------------------------------------
+    # Start query
+    # ----------------------------------------------
+
+    query = db.query(CustomerRequest)
+
+    # ----------------------------------------------
+    # Search
+    # Searches:
+    # - Subject
+    # - Description
+    # - Service
+    # ----------------------------------------------
+
+    if search and search.strip():
+        search_value = f"%{search.strip()}%"
+
+        query = query.filter(
+            or_(
+                CustomerRequest.subject.ilike(search_value),
+                CustomerRequest.description.ilike(search_value),
+                CustomerRequest.service.ilike(search_value),
+            )
+        )
+
+    # ----------------------------------------------
+    # Status Filter
+    # ----------------------------------------------
+
+    if status_filter and status_filter.strip():
+        query = query.filter(
+            CustomerRequest.status == status_filter.strip()
+        )
+
+    # ----------------------------------------------
+    # Service Filter
+    # ----------------------------------------------
+
+    if service and service.strip():
+        query = query.filter(
+            CustomerRequest.service == service.strip()
+        )
+
+    # ----------------------------------------------
+    # Order results
+    # ----------------------------------------------
+
     requests = (
-        db.query(CustomerRequest)
+        query
         .order_by(CustomerRequest.created_at.desc())
         .all()
     )
@@ -135,7 +207,11 @@ def get_request(
 ):
     user_id = int(current_user["sub"])
 
-    user = db.query(User).filter(User.id == user_id).first()
+    user = (
+        db.query(User)
+        .filter(User.id == user_id)
+        .first()
+    )
 
     if not user:
         raise HTTPException(
@@ -185,7 +261,11 @@ def update_request_status(
 ):
     user_id = int(current_user["sub"])
 
-    user = db.query(User).filter(User.id == user_id).first()
+    user = (
+        db.query(User)
+        .filter(User.id == user_id)
+        .first()
+    )
 
     if not user:
         raise HTTPException(
