@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
-from jose import jwt
 
 from app.database.connection import get_db
 from app.models.user import User
 from app.schemas.auth import UserResponse, UserUpdate
-from app.core.security import SECRET_KEY, ALGORITHM
+from app.core.dependencies import get_current_user_db
+from app.core.permissions import require_permission
 
 
 router = APIRouter(
@@ -14,77 +13,28 @@ router = APIRouter(
     tags=["Users"],
 )
 
-security = HTTPBearer()
 
-
-def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-    db: Session = Depends(get_db),
-):
-    token = credentials.credentials
-
-    try:
-        payload = jwt.decode(
-            token,
-            SECRET_KEY,
-            algorithms=[ALGORITHM],
-        )
-
-        user_id = payload.get("sub")
-
-        if user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid authentication token",
-            )
-
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid authentication token",
-        )
-
-    user = db.query(User).filter(User.id == int(user_id)).first()
-
-    if user is None:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
-
-    return user
-
-
-# Admin-only authentication
-def get_current_admin(
-    current_user: User = Depends(get_current_user),
-):
-    if not current_user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required",
-        )
-
-    return current_user
-
-
+# Get current user's profile
+# Requires login
 @router.get(
     "/me",
     response_model=UserResponse,
 )
 def get_my_profile(
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_db),
 ):
     return current_user
 
 
+# Update current user's profile
+# Requires login
 @router.put(
     "/me",
     response_model=UserResponse,
 )
 def update_my_profile(
     user_data: UserUpdate,
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_user_db),
     db: Session = Depends(get_db),
 ):
     existing_user = (
@@ -109,3 +59,20 @@ def update_my_profile(
     db.refresh(current_user)
 
     return current_user
+
+
+# Get all users
+# Requires view_users permission
+@router.get(
+    "",
+    response_model=list[UserResponse],
+)
+def get_all_users(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(require_permission("view_users")),
+):
+    return (
+        db.query(User)
+        .order_by(User.id.asc())
+        .all()
+    )

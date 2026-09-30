@@ -48,6 +48,7 @@ def register(
         name=user_data.name,
         email=user_data.email,
         password_hash=hash_password(user_data.password),
+        role="employee",
     )
 
     db.add(new_user)

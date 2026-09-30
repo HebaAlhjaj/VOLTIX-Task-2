@@ -4,6 +4,7 @@ from sqlalchemy import or_
 
 from app.database.connection import get_db
 from app.core.dependencies import get_current_user
+from app.core.permissions import require_permission
 from app.models.user import User
 from app.models.customer_request import CustomerRequest
 from app.schemas.customer_request import (
@@ -110,32 +111,8 @@ def get_all_requests(
         description="Filter by service",
     ),
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_permission("view_requests")),
 ):
-    # ----------------------------------------------
-    # Check admin
-    # ----------------------------------------------
-
-    user_id = int(current_user["sub"])
-
-    user = (
-        db.query(User)
-        .filter(User.id == user_id)
-        .first()
-    )
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
-
-    if not user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required",
-        )
-
     # ----------------------------------------------
     # Start query
     # ----------------------------------------------
@@ -257,28 +234,8 @@ def update_request_status(
     request_id: int,
     status_data: CustomerRequestStatusUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_permission("manage_requests")),
 ):
-    user_id = int(current_user["sub"])
-
-    user = (
-        db.query(User)
-        .filter(User.id == user_id)
-        .first()
-    )
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found",
-        )
-
-    if not user.is_admin:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required",
-        )
-
     allowed_statuses = [
         "Pending",
         "In Progress",
@@ -310,3 +267,4 @@ def update_request_status(
     db.refresh(request)
 
     return request
+

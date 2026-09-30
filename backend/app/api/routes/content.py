@@ -8,7 +8,7 @@ from app.schemas.content import (
     ContentResponse,
     ContentUpdate,
 )
-from app.core.dependencies import get_current_user
+from app.core.permissions import require_permission
 
 
 router = APIRouter(
@@ -18,10 +18,11 @@ router = APIRouter(
 
 
 # GET - Get all content items
-# Public - does not require login
+# Requires view_content permission
 @router.get("/", response_model=list[ContentResponse])
 def get_content_items(
     db: Session = Depends(get_db),
+    current_user=Depends(require_permission("view_content")),
 ):
     return (
         db.query(ContentItem)
@@ -31,11 +32,12 @@ def get_content_items(
 
 
 # GET - Get one content item
-# Public - does not require login
+# Requires view_content permission
 @router.get("/{content_id}", response_model=ContentResponse)
 def get_content_item(
     content_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(require_permission("view_content")),
 ):
     item = (
         db.query(ContentItem)
@@ -53,7 +55,7 @@ def get_content_item(
 
 
 # POST - Create content item
-# Protected - requires login
+# Requires manage_content permission
 @router.post(
     "/",
     response_model=ContentResponse,
@@ -62,7 +64,7 @@ def get_content_item(
 def create_content_item(
     content: ContentCreate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_permission("manage_content")),
 ):
     new_item = ContentItem(
         title=content.title,
@@ -80,7 +82,7 @@ def create_content_item(
 
 
 # PUT - Update content item
-# Protected - requires login
+# Requires manage_content permission
 @router.put(
     "/{content_id}",
     response_model=ContentResponse,
@@ -89,7 +91,7 @@ def update_content_item(
     content_id: int,
     content: ContentUpdate,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_permission("manage_content")),
 ):
     item = (
         db.query(ContentItem)
@@ -116,12 +118,12 @@ def update_content_item(
 
 
 # DELETE - Delete content item
-# Protected - requires login
+# Requires manage_content permission
 @router.delete("/{content_id}")
 def delete_content_item(
     content_id: int,
     db: Session = Depends(get_db),
-    current_user=Depends(get_current_user),
+    current_user=Depends(require_permission("manage_content")),
 ):
     item = (
         db.query(ContentItem)

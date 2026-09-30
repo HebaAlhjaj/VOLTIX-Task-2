@@ -2,13 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database.connection import get_db
+from app.core.permissions import require_permission
 from app.models.service import Service
 from app.schemas.service import (
     ServiceCreate,
     ServiceUpdate,
     ServiceResponse,
 )
-from app.api.routes.users import get_current_admin
 
 
 router = APIRouter(
@@ -19,14 +19,16 @@ router = APIRouter(
 
 # ================================
 # GET ALL SERVICES
-# Public endpoint
+# Permission: view_services
 # ================================
+
 @router.get(
     "",
     response_model=list[ServiceResponse],
 )
 def get_services(
     db: Session = Depends(get_db),
+    current_user=Depends(require_permission("view_services")),
 ):
     services = (
         db.query(Service)
@@ -40,8 +42,9 @@ def get_services(
 
 # ================================
 # GET SINGLE SERVICE
-# Public endpoint
+# Permission: view_services
 # ================================
+
 @router.get(
     "/{service_id}",
     response_model=ServiceResponse,
@@ -49,6 +52,7 @@ def get_services(
 def get_service(
     service_id: int,
     db: Session = Depends(get_db),
+    current_user=Depends(require_permission("view_services")),
 ):
     service = (
         db.query(Service)
@@ -67,8 +71,9 @@ def get_service(
 
 # ================================
 # CREATE SERVICE
-# Admin only
+# Permission: manage_services
 # ================================
+
 @router.post(
     "",
     response_model=ServiceResponse,
@@ -77,7 +82,7 @@ def get_service(
 def create_service(
     service_data: ServiceCreate,
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin),
+    current_user=Depends(require_permission("manage_services")),
 ):
     new_service = Service(
         title=service_data.title,
@@ -95,8 +100,9 @@ def create_service(
 
 # ================================
 # UPDATE SERVICE
-# Admin only
+# Permission: manage_services
 # ================================
+
 @router.put(
     "/{service_id}",
     response_model=ServiceResponse,
@@ -105,7 +111,7 @@ def update_service(
     service_id: int,
     service_data: ServiceUpdate,
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin),
+    current_user=Depends(require_permission("manage_services")),
 ):
     service = (
         db.query(Service)
@@ -132,15 +138,16 @@ def update_service(
 
 # ================================
 # DELETE SERVICE
-# Admin only
+# Permission: manage_services
 # ================================
+
 @router.delete(
     "/{service_id}",
 )
 def delete_service(
     service_id: int,
     db: Session = Depends(get_db),
-    current_admin=Depends(get_current_admin),
+    current_user=Depends(require_permission("manage_services")),
 ):
     service = (
         db.query(Service)
@@ -160,3 +167,4 @@ def delete_service(
     return {
         "message": "Service deleted successfully"
     }
+
