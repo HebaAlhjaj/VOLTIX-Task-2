@@ -56,3 +56,32 @@ def get_current_user_db(
         )
 
     return user
+
+
+def require_admin(
+    current_user: User = Depends(get_current_user_db),
+):
+    """
+    Allow access only to Admin users.
+    Supports both the existing is_admin field
+    and the role field.
+    """
+
+    if not current_user.is_admin and current_user.role.lower() != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin access required",
+        )
+
+    return current_user
+
+
+def require_team_member(
+    current_user: User = Depends(get_current_user_db),
+):
+    """
+    Allow authenticated users who are not restricted
+    to admin-only actions.
+    """
+
+    return current_user

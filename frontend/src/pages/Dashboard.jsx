@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
+import ProjectManagement from "../components/ProjectManagement";
+import ClientManagement from "../components/ClientManagement";
+
 import {
   FiFile,
   FiTrash2,
@@ -32,7 +35,6 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
-
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
@@ -47,42 +49,22 @@ function Dashboard() {
   });
 
   const [requests, setRequests] = useState([]);
-
-  const [requestsLoading, setRequestsLoading] =
-    useState(true);
-
-  const [submittingRequest, setSubmittingRequest] =
-    useState(false);
-
-  const [requestMessage, setRequestMessage] =
-    useState("");
-
-  const [requestError, setRequestError] =
-    useState("");
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [submittingRequest, setSubmittingRequest] = useState(false);
+  const [requestMessage, setRequestMessage] = useState("");
+  const [requestError, setRequestError] = useState("");
 
   // ========================================
   // FILE MANAGEMENT
   // ========================================
 
   const [files, setFiles] = useState([]);
-
-  const [filesLoading, setFilesLoading] =
-    useState(true);
-
-  const [selectedFile, setSelectedFile] =
-    useState(null);
-
-  const [uploadingFile, setUploadingFile] =
-    useState(false);
-
-  const [deletingFileId, setDeletingFileId] =
-    useState(null);
-
-  const [fileMessage, setFileMessage] =
-    useState("");
-
-  const [fileError, setFileError] =
-    useState("");
+  const [filesLoading, setFilesLoading] = useState(true);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadingFile, setUploadingFile] = useState(false);
+  const [deletingFileId, setDeletingFileId] = useState(null);
+  const [fileMessage, setFileMessage] = useState("");
+  const [fileError, setFileError] = useState("");
 
   const fileInputRef = useRef(null);
 
@@ -91,24 +73,20 @@ function Dashboard() {
   // ========================================
 
   useEffect(() => {
-    const token =
-      localStorage.getItem("access_token");
+    const token = localStorage.getItem("access_token");
 
     if (!token) {
       window.location.href = "/login";
       return;
     }
 
-    fetch(
-      "http://127.0.0.1:8000/api/users/me",
-      {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-      }
-    )
+    fetch("http://127.0.0.1:8000/api/users/me", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+      },
+    })
       .then(async (response) => {
         if (!response.ok) {
           throw new Error("Unauthorized");
@@ -125,10 +103,7 @@ function Dashboard() {
         });
       })
       .catch(() => {
-        localStorage.removeItem(
-          "access_token"
-        );
-
+        localStorage.removeItem("access_token");
         window.location.href = "/login";
       })
       .finally(() => {
@@ -223,8 +198,7 @@ function Dashboard() {
     setMessage("");
     setError("");
 
-    const token =
-      localStorage.getItem("access_token");
+    const token = localStorage.getItem("access_token");
 
     try {
       const response = await fetch(
@@ -232,8 +206,7 @@ function Dashboard() {
         {
           method: "PUT",
           headers: {
-            "Content-Type":
-              "application/json",
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
@@ -247,8 +220,7 @@ function Dashboard() {
 
       if (!response.ok) {
         throw new Error(
-          data.detail ||
-            "Failed to update profile"
+          data.detail || "Failed to update profile"
         );
       }
 
@@ -318,7 +290,6 @@ function Dashboard() {
     const file = e.target.files?.[0];
 
     setSelectedFile(file || null);
-
     setFileMessage("");
     setFileError("");
   };
@@ -327,10 +298,7 @@ function Dashboard() {
     e.preventDefault();
 
     if (!selectedFile) {
-      setFileError(
-        "Please select a file first."
-      );
-
+      setFileError("Please select a file first.");
       return;
     }
 
@@ -418,8 +386,7 @@ function Dashboard() {
     ];
 
     const index = Math.floor(
-      Math.log(numericBytes) /
-        Math.log(1024)
+      Math.log(numericBytes) / Math.log(1024)
     );
 
     const size =
@@ -495,10 +462,7 @@ function Dashboard() {
   // ========================================
 
   const handleLogout = () => {
-    localStorage.removeItem(
-      "access_token"
-    );
-
+    localStorage.removeItem("access_token");
     window.location.href = "/login";
   };
 
@@ -526,9 +490,7 @@ function Dashboard() {
     <div className="dashboard-page">
       <div className="dashboard-container">
 
-        {/* ========================================
-            HEADER
-        ======================================== */}
+        {/* HEADER */}
 
         <div className="dashboard-header">
           <div>
@@ -563,9 +525,7 @@ function Dashboard() {
           </div>
         </div>
 
-        {/* ========================================
-            ACCOUNT INFORMATION
-        ======================================== */}
+        {/* ACCOUNT INFORMATION */}
 
         <div className="profile-card">
           <div className="profile-card-header">
@@ -648,9 +608,7 @@ function Dashboard() {
               onSubmit={handleSave}
             >
               <div className="profile-input-group">
-                <label>
-                  Name
-                </label>
+                <label>Name</label>
 
                 <input
                   type="text"
@@ -662,9 +620,7 @@ function Dashboard() {
               </div>
 
               <div className="profile-input-group">
-                <label>
-                  Email
-                </label>
+                <label>Email</label>
 
                 <input
                   type="email"
@@ -699,12 +655,21 @@ function Dashboard() {
           )}
         </div>
 
-        {/* ========================================
-            FILE MANAGEMENT
-        ======================================== */}
+        {/* CLIENT MANAGEMENT */}
+
+        <ClientManagement
+          currentUser={user}
+        />
+
+        {/* PROJECT MANAGEMENT */}
+
+        <ProjectManagement
+          currentUser={user}
+        />
+
+        {/* FILE MANAGEMENT */}
 
         <div className="request-card file-management-card">
-
           <div className="file-management-header">
             <div>
               <p className="dashboard-label">
@@ -734,13 +699,8 @@ function Dashboard() {
             </div>
           )}
 
-          {/* Upload */}
-
-          <form
-            onSubmit={handleUploadFile}
-          >
+          <form onSubmit={handleUploadFile}>
             <div className="file-upload-area">
-
               <div className="file-upload-info">
                 <div className="file-upload-icon">
                   <FiUpload />
@@ -759,7 +719,6 @@ function Dashboard() {
               </div>
 
               <div className="file-input-wrapper">
-
                 <input
                   ref={fileInputRef}
                   id="dashboard-file-input"
@@ -773,16 +732,13 @@ function Dashboard() {
                   className="file-select-button"
                 >
                   <FiFile />
-
                   Choose File
                 </label>
-
               </div>
             </div>
 
             {selectedFile && (
               <div className="selected-file">
-
                 <div>
                   <div className="selected-file-name">
                     {selectedFile.name}
@@ -804,12 +760,9 @@ function Dashboard() {
                     ? "Uploading..."
                     : "Upload File"}
                 </button>
-
               </div>
             )}
           </form>
-
-          {/* Files List */}
 
           <div className="files-list-header">
             <h3>
@@ -830,7 +783,6 @@ function Dashboard() {
             </div>
           ) : files.length === 0 ? (
             <div className="files-empty">
-
               <div className="files-empty-icon">
                 <FiFile />
               </div>
@@ -843,25 +795,20 @@ function Dashboard() {
                 Upload your first file using
                 the area above.
               </p>
-
             </div>
           ) : (
             <div className="files-list">
-
               {files.map((file) => (
                 <div
                   className="file-item"
                   key={file.id}
                 >
-
                   <div className="file-item-info">
-
                     <div className="file-icon">
                       <FiFile />
                     </div>
 
                     <div className="file-details">
-
                       <strong>
                         {getFileName(file)}
                       </strong>
@@ -875,18 +822,14 @@ function Dashboard() {
                         {" • "}
                         {getFileDate(file)}
                       </span>
-
                     </div>
-
                   </div>
 
                   <button
                     type="button"
                     className="file-delete-button"
                     onClick={() =>
-                      handleDeleteFile(
-                        file.id
-                      )
+                      handleDeleteFile(file.id)
                     }
                     disabled={
                       deletingFileId ===
@@ -896,21 +839,15 @@ function Dashboard() {
                   >
                     <FiTrash2 />
                   </button>
-
                 </div>
               ))}
-
             </div>
           )}
-
         </div>
 
-        {/* ========================================
-            SUBMIT REQUEST
-        ======================================== */}
+        {/* SUBMIT REQUEST */}
 
         <div className="request-card">
-
           <div className="request-card-header">
             <div>
               <p className="dashboard-label">
@@ -945,16 +882,12 @@ function Dashboard() {
             onSubmit={handleSubmitRequest}
           >
             <div className="request-input-group">
-              <label>
-                Service
-              </label>
+              <label>Service</label>
 
               <select
                 name="service"
                 value={requestForm.service}
-                onChange={
-                  handleRequestChange
-                }
+                onChange={handleRequestChange}
                 required
               >
                 <option value="">
@@ -980,35 +913,25 @@ function Dashboard() {
             </div>
 
             <div className="request-input-group">
-              <label>
-                Subject
-              </label>
+              <label>Subject</label>
 
               <input
                 type="text"
                 name="subject"
                 value={requestForm.subject}
-                onChange={
-                  handleRequestChange
-                }
+                onChange={handleRequestChange}
                 placeholder="What do you need?"
                 required
               />
             </div>
 
             <div className="request-input-group request-full-width">
-              <label>
-                Description
-              </label>
+              <label>Description</label>
 
               <textarea
                 name="description"
-                value={
-                  requestForm.description
-                }
-                onChange={
-                  handleRequestChange
-                }
+                value={requestForm.description}
+                onChange={handleRequestChange}
                 placeholder="Describe your request..."
                 rows="5"
                 required
@@ -1018,24 +941,18 @@ function Dashboard() {
             <button
               type="submit"
               className="request-submit-button"
-              disabled={
-                submittingRequest
-              }
+              disabled={submittingRequest}
             >
               {submittingRequest
                 ? "Submitting..."
                 : "Submit Request"}
             </button>
           </form>
-
         </div>
 
-        {/* ========================================
-            MY REQUESTS
-        ======================================== */}
+        {/* MY REQUESTS */}
 
         <div className="request-card">
-
           <div className="request-card-header">
             <div>
               <p className="dashboard-label">
@@ -1070,15 +987,12 @@ function Dashboard() {
             </div>
           ) : (
             <div className="requests-list">
-
               {requests.map((request) => (
                 <div
                   className="request-item"
                   key={request.id}
                 >
-
                   <div className="request-item-main">
-
                     <div>
                       <span className="request-service">
                         {request.service}
@@ -1100,11 +1014,9 @@ function Dashboard() {
                     >
                       {request.status}
                     </span>
-
                   </div>
 
                   <div className="request-item-footer">
-
                     <span>
                       Request #{request.id}
                     </span>
@@ -1116,15 +1028,11 @@ function Dashboard() {
                           ).toLocaleDateString()
                         : "-"}
                     </span>
-
                   </div>
-
                 </div>
               ))}
-
             </div>
           )}
-
         </div>
 
       </div>
